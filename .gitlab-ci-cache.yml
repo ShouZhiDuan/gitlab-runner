@@ -1,0 +1,67 @@
+#测试缓存cache的用法
+#参考：https://zhuanlan.zhihu.com/p/106971627
+#关于.gitlab-ci.yml更多用法参考https://segmentfault.com/a/1190000019540360
+
+stages:
+  - test1
+  - test2
+  - test3
+  - deploy
+
+
+#定义全局缓存
+cache:
+  key: $CI_COMMIT_REF_SLUG
+  #缓存所有Git未跟踪的文件
+  untracked: true
+  paths: #相对项目根目录地址
+    - cache_test.txt
+  #每次都会拉取最新的
+  #pull：(总结一句话：任何job的操作都不会刷新到缓存中)每次每个job如果有缓存历史都会使用缓存历史做操作的对象。反之没有缓存历史每次每个job基于仓库文件操作。所以在使用pull的时候首先要明确是否有缓存历史。（无缓存迭代）
+  #push：（总结一句话：任何job都是以仓库文件为准,不会以缓存为准），也就是类似缓存失效。（无缓存迭代）
+  #pull-push：有缓存基于最后一次job的修改刷新到缓存操作，没有缓存基于仓库源文件操作。往后基于当前缓存迭代变更。（有缓存迭代）
+  policy: pull
+
+
+job-1:
+  stage: test1
+  script:
+    - cat cache_test.txt
+    - echo "test1-aaaaaa" >> cache_test.txt
+    - cat cache_test.txt
+  tags:
+    - demo
+
+job-2:
+  stage: test2
+  cache:
+    key: $CI_COMMIT_REF_SLUG
+    paths:
+      - cache_test.txt
+    policy: pull
+  script:
+    - cat cache_test.txt
+    - echo "test2-aaaaaa" >> cache_test.txt
+    - cat cache_test.txt
+  tags:
+    - demo
+
+
+
+job-3:
+  stage: test3
+  script:
+    - ls
+    - cat cache_test.txt
+    - echo "test3-aaaaaa" >> cache_test.txt
+    - cat cache_test.txt
+  tags:
+    - demo
+
+
+
+# 定义 job
+.job-5:    #对于临时不想执行的job，可以选择在前面加个"."，这样就会跳过此步任务，否则你除了要注释掉这个jobj外，还需要注释上面为deploy的stage
+  stage: deploy
+  script:
+    - echo "I am job 5"

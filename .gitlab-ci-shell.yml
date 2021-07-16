@@ -1,0 +1,117 @@
+#基于自建gitlab-runner镜像,已集成docker、docker-compose、jdk、maven等
+#参考：docker/Dockerfile文件
+#Image：registry.cn-hangzhou.aliyuncs.com/dsz-docker/runner-for-java:20210715-1
+
+before_script:
+  # 这里定义了打包成功后的Docker镜像名称，每一次提交代码后构建成功的镜像名称都是唯一的
+#  - export IMAGE_FULL_NAME=${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHA}
+#  registry.cn-hangzhou.aliyuncs.com/dsz-docker/docker:[镜像版本号]
+  - export IMAGE_FULL_NAME=registry.cn-hangzhou.aliyuncs.com/dsz-docker/demo:20210715-1
+  - export gitla_runner_image=registry.cn-hangzhou.aliyuncs.com/dsz-docker/runner-for-java:20210715-1
+
+
+# 定义CI执行的阶段，这里可以自己根据情况定义多少个阶段
+stages:
+  - whoami
+  - build_image
+  - compile
+  - build
+  - run
+
+
+#全局变量
+variables:
+  #MAVEN_REPO: "/.m2"
+  PROJECT: demo
+  docker_user: duanshouzhi516518
+  docker_pwd: dszazhy1314
+  dsz_docker_hub: registry.cn-hangzhou.aliyuncs.com
+
+whoami:
+  stage: whoami
+  tags:
+    - demo
+  script:
+    - echo "当前登录的用户"
+    - whoami
+    - echo "Docker版本信息"
+    - docker -v
+    - echo "DockerCompose版本信息"
+    - docker-compose -v
+    - echo "======env======"
+    - env
+
+
+##构建gitlab-runner镜像
+build_image:
+#  image: docker:stable
+  stage: build_image
+  tags:
+    - demo
+  script:
+    - echo $docker_user
+    - echo $docker_pwd
+    - echo $dsz_docker_hub
+    - cd docker
+    - docker login --username=$docker_user --password=$docker_pwd  $dsz_docker_hub
+    # 这里的变量就是我们全局配置定义的了
+    - docker build -t $gitla_runner_image .
+    - docker push $gitla_runner_image
+#    - rm -rf target
+    - docker rmi $gitla_runner_image
+
+
+# 1、编译
+compile:
+#  image: maven:3.5-jdk-8-alpine
+  stage: compile
+  allow_failure: false
+  # 只在哪个分支生效
+  only:
+    - master
+  tags:
+    - demo
+  # 运行脚本
+  script:
+#    - $MAVEN_HOME/bin/mvn -Dmaven.repo.local=$MAVEN_REPO clean package -Dmaven.test.skip=true
+#     - /usr/local/maven/apache-maven-3.6.2/bin/mvn clean package -Dmaven.test.skip=true
+    - mvn clean package -Dmaven.test.skip=true
+  # 因为是Maven编译，所以会有Jar包产物，这里定义产物的过期时间
+  artifacts:
+    name: $PROJECT
+    expire_in: 1 days
+    paths:
+      - target/*.jar
+
+
+# 2、构建SpringBoot镜像
+build:
+#  image: docker:stable
+  stage: build
+  script:
+    # 这里的变量会自动获取你当前推送代码的gitlab用户和密码以及仓库地址
+    #- docker login --username $CI_REGISTRY_USER --password $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker login --username=$docker_user --password=$docker_pwd $dsz_docker_hub
+    # 这里的变量就是我们全局配置定义的了
+    - docker build -t $IMAGE_FULL_NAME .
+    - docker push $IMAGE_FULL_NAME
+    - rm -rf target
+    - docker rmi $IMAGE_FULL_NAME
+  only:
+    - master
+  tags:
+    - demo
+
+
+# 3、运行
+run:
+#  image: docker:stable
+  stage: run
+  script:
+    - docker stop $PROJECT || true
+    - docker rm $PROJECT || true
+    - docker-compose up -d
+  only:
+    - master
+  tags:
+    - demo

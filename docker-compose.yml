@@ -1,0 +1,12 @@
+version: '3'
+services:
+  # 指定服务名称
+  demo-service:
+    # 指定服务使用的镜像
+    image: registry.cn-hangzhou.aliyuncs.com/dsz-docker/demo:latest
+    # 指定容器名称
+    container_name: demo
+    command:
+    # 指定服务运行的端口
+    ports :
+      - 5000:5000
