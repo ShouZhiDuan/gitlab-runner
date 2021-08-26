@@ -23,5 +23,5 @@ COPY  ./target/demo.jar ${JAR_NAME}
 #ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-Dserver.port=${PORT}","-jar","/${JAR_NAME}"]
 #ENTRYPOINT ["java","-Dserver.port=${PORT}","-jar","${RUN_JAR}"]
 #to see https://codingdict.com/questions/52925
-ENTRYPOINT java "-Dserver.port=${PORT}" -jar "/${RUN_JAR}"
+CMD java "-Dserver.port=${PORT}" -jar "/${RUN_JAR}"
 

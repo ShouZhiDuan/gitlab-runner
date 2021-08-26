@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+  <localRepository>/.m2</localRepository>
+  <pluginGroups>
+    <pluginGroup>com.spotify</pluginGroup>
+  </pluginGroups>
+  <proxies>
+  </proxies>
+  <servers>
+    <server>
+      <id>Releases</id>
+      <username>dev</username>
+      <password>hz_dev</password>
+    </server>
+    <server>
+      <id>Snapshots</id>
+      <username>dev</username>
+      <password>hz_dev</password>
+    </server>
+    
+	<server>
+        <id>docker-hub</id>
+        <username>admin</username>
+        <password>NVXClouds_168</password>
+        <configuration>
+            <email>dszazhy1314@163.com</email>
+        </configuration>
+    </server>
+  </servers>
+  <mirrors>
+	  <mirror>
+		  <id>nexus</id>
+		  <url>http://192.168.10.16:8081/repository/maven-public/</url>
+		 <mirrorOf>*</mirrorOf>
+	  </mirror>
+  </mirrors>
+  <profiles>
+ <profile>
+      <id>dev</id>
+      <repositories>
+        <repository> 
+            <id>nexus</id> 
+            <name>local private nexus</name> 
+            <url>http://192.168.10.16:8081/repository/maven-public/</url> 
+            <releases>
+		            <enabled>true</enabled>
+		            <updatePolicy>always</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
+	           </releases> 
+            <snapshots>
+		            <enabled>false</enabled>
+            </snapshots> 
+        </repository>        
+      </repositories> 
+    </profile>
+  </profiles>
+   <activeProfiles>
+    <activeProfile>dev</activeProfile>
+  </activeProfiles>
+</settings>

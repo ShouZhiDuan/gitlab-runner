@@ -1,0 +1,163 @@
+---
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 3
+  selector:             # 匹配具有同一个label属性的pod标签
+    matchLabels:
+      app: nginx
+  template:             # 定义pod的模板
+    metadata:
+      labels:
+        app: nginx      # 定义当前pod的label属性，app为key，value为nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.7.9
+          ports:
+            - containerPort: 80
+
+
+---
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: springboot-service
+spec:
+  selector:
+    app: user-service
+  ports:
+    - protocol: TCP
+      #集群内部service端口
+      port: 30001
+      #pod副本端口
+      targetPort: 5000
+      #暴露宿主机端口，不指定会随机分配，ClusterIp模式不需要指定nodePort
+      nodePort: 30002
+  #service模式ClusterIp、NodePort
+  type: NodePort
+
+
+---
+#Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+ name: myns
+
+
+---
+#Pod
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod
+  namespace: myns  #指定自定义的命名空间
+spec:
+  containers:
+    - name: nginx-container
+      image: nginx
+      ports:
+        - containerPort: 80
+
+
+
+---
+#参考模板
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tomcat-deployment
+  labels:
+    app: tomcat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tomcat
+  template:
+    metadata:
+      labels:
+        app: tomcat
+    spec:
+      containers:
+        - name: tomcat
+          image: tomcat
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tomcat-service
+spec:
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app: tomcat
+  type: NodePort
+
+
+
+###ingress部署
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: nginx-ingress
+spec:
+  rules:
+    - host: spring.demo.com
+      http:
+        paths:
+          - path: /cicd/say
+            backend:
+              serviceName: springboot-service #service名称 对应下面的springboot-service
+              servicePort: 80 #service端口 对应下面的service port
+
+###ingress deployment部署
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springboot-deployment
+  labels:
+    app: user-service-dep
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: user-service
+  template:
+    metadata:
+      labels:
+        app: user-service
+    spec:
+      containers:
+        - name: user-service
+          image: registry.cn-hangzhou.aliyuncs.com/dsz-docker/demo:latest-10
+          ports:
+            - containerPort: 5000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: springboot-service
+spec:
+  selector:
+    app: user-service
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
+      nodePort: 30002
+  type: NodePort

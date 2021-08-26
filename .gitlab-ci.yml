@@ -8,7 +8,7 @@
 
 
 before_script:
-  # 这里定义了打包成功后的Docker镜像名称，每一次提交代码后构建成功的镜像名称都是唯一的
+# 这里定义了打包成功后的Docker镜像名称，每一次提交代码后构建成功的镜像名称都是唯一的
 #  - export IMAGE_FULL_NAME=${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHA}
 #  registry.cn-hangzhou.aliyuncs.com/dsz-docker/docker:[镜像版本号]
 
@@ -24,12 +24,12 @@ image:
   entrypoint: [""]
 
 
-#image: docker:latest
+  #image: docker:latest
 
   #services:
-#  - docker/compose:latest
-#  - docker:latest
-#  - maven:latest
+  #  - docker/compose:latest
+  #  - docker:latest
+  #  - maven:latest
 
   # 定义CI执行的阶段，这里可以自己根据情况定义多少个阶段
 stages:
@@ -46,16 +46,19 @@ stages:
 variables:
   MAVEN_REPO: /.m2
   PROJECT: demo
-  IMAGE_FULL_NAME: registry.cn-hangzhou.aliyuncs.com/dsz-docker/demo:20210715-1
-  gitla_runner_image: registry.cn-hangzhou.aliyuncs.com/dsz-docker/dsz-gitlab-runner:20210715-1
+  gitla_runner_image: registry.cn-hangzhou.aliyuncs.com/dsz-docker/deploy-for-java:20210802-1
+  IMAGE_FULL_NAME: registry.cn-hangzhou.aliyuncs.com/dsz-docker/demo:latest-10
   dsz_docker_hub: registry.cn-hangzhou.aliyuncs.com
   docker_user: duanshouzhi516518
   docker_pwd: dszazhy1314
+#  IMAGE_FULL_NAME: nvxhub.nvxclouds.net:9443/skadi/demo:skadi-2
+#  dsz_docker_hub: nvxhub.nvxclouds.net:9443
+#  docker_user: huzhengxing
+#  docker_pwd: NVXClouds_168
 
 
-
-whoami:
-#  image: docker:latest
+.whoami:
+  #  image: docker:latest
   stage: whoami
   tags:
     - gw-new-docker
@@ -64,8 +67,8 @@ whoami:
     - docker -v
 
 
-whoami2:
-#  image: docker/compose:latest
+.whoami2:
+  #  image: docker/compose:latest
   stage: whoami2
   tags:
     - gw-new-docker
@@ -73,7 +76,7 @@ whoami2:
     - docker-compose -v
 
 
-show_env_1:
+.show_env_1:
   stage: show_env
   tags:
     - gw-new-docker
@@ -83,7 +86,7 @@ show_env_1:
     - echo $test_name
 
 
-show_env_2:
+.show_env_2:
   stage: show_env
   tags:
     - gw-new-docker
@@ -94,8 +97,8 @@ show_env_2:
 
 
 #构建gitlab-runner镜像
-build_image:
-#  image: docker:latest
+.build_image:
+  #  image: docker:latest
   stage: build_image
   tags:
     - gw-new-docker
@@ -109,10 +112,10 @@ build_image:
     - docker rmi $gitla_runner_image
 
 
-  # 1、编译
+# 1、编译
 compile:
-#  image: maven:latest
-#  image: registry.cn-hangzhou.aliyuncs.com/dsz-docker/maven:latest
+  #  image: maven:latest
+  #  image: registry.cn-hangzhou.aliyuncs.com/dsz-docker/maven:latest
   stage: compile
   allow_failure: false
   # 只在哪个分支生效
@@ -123,8 +126,8 @@ compile:
   # 运行脚本
   script:
     - env
-#    - $MAVEN_HOME/bin/mvn -Dmaven.repo.local=$MAVEN_REPO clean package -Dmaven.test.skip=true
-#     - /usr/local/maven/apache-maven-3.6.2/bin/mvn clean package -Dmaven.test.skip=true
+    #    - $MAVEN_HOME/bin/mvn -Dmaven.repo.local=$MAVEN_REPO clean package -Dmaven.test.skip=true
+    #     - /usr/local/maven/apache-maven-3.6.2/bin/mvn clean package -Dmaven.test.skip=true
     - mvn -Dmaven.repo.local=$MAVEN_REPO clean package -Dmaven.test.skip=true
   # 因为是Maven编译，所以会有Jar包产物，这里定义产物的过期时间
   artifacts:
@@ -136,7 +139,7 @@ compile:
 
 # 2、构建SpringBoot镜像
 build:
-#  image: docker:latest
+  #  image: docker:latest
   stage: build
   script:
     # 这里的变量会自动获取你当前推送代码的gitlab用户和密码以及仓库地址
@@ -154,14 +157,14 @@ build:
 
 
 # 3、运行
-run:
-#  image: docker:latest
-#  image: docker/compose:latest
+.run:
+  #  image: docker:latest
+  #  image: docker/compose:latest
   stage: run
   script:
-    - docker stop $PROJECT || true
-    - docker rm $PROJECT || true
-#    - docker-compose down
+    #- docker stop $PROJECT || true
+    #- docker rm $PROJECT || true
+    - docker-compose down
     - docker-compose up -d
   only:
     - master

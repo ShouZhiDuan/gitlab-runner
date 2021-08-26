@@ -7,5 +7,5 @@ services:
     # 指定容器名称
     container_name: demo
     # 指定服务运行的端口
-    ports :
+    ports:
       - 5000:5000

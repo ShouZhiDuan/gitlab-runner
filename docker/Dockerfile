@@ -37,6 +37,8 @@ WORKDIR /usr/local/maven
 #RUN tar -zxvf apache-maven-3.6.2-bin.tar.gz  &&  rm -fr apache-maven-3.6.2-bin.tar.gz
 RUN wget http://apache-mirror.rbc.ru/pub/apache/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.tar.gz
 RUN tar xzvf apache-maven-3.3.9-bin.tar.gz
+#配置settings文件
+COPY settings.xml /usr/local/maven/apache-maven-3.3.9/conf/
 RUN cp -R apache-maven-3.3.9 /usr/local/bin
 RUN rm -rf apache-maven-3.3.9-bin.tar.gz
 RUN export PATH=apache-maven-3.3.9/bin:$PATH

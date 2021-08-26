@@ -4,8 +4,8 @@
 
 before_script:
   # 这里定义了打包成功后的Docker镜像名称，每一次提交代码后构建成功的镜像名称都是唯一的
-#  - export IMAGE_FULL_NAME=${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHA}
-#  registry.cn-hangzhou.aliyuncs.com/dsz-docker/docker:[镜像版本号]
+  #  - export IMAGE_FULL_NAME=${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHA}
+  #  registry.cn-hangzhou.aliyuncs.com/dsz-docker/docker:[镜像版本号]
   - export IMAGE_FULL_NAME=registry.cn-hangzhou.aliyuncs.com/dsz-docker/demo:20210715-1
   - export gitla_runner_image=registry.cn-hangzhou.aliyuncs.com/dsz-docker/runner-for-java:20210715-1
 
@@ -44,7 +44,7 @@ whoami:
 
 ##构建gitlab-runner镜像
 build_image:
-#  image: docker:stable
+  #  image: docker:stable
   stage: build_image
   tags:
     - demo
@@ -57,13 +57,13 @@ build_image:
     # 这里的变量就是我们全局配置定义的了
     - docker build -t $gitla_runner_image .
     - docker push $gitla_runner_image
-#    - rm -rf target
+    #    - rm -rf target
     - docker rmi $gitla_runner_image
 
 
 # 1、编译
 compile:
-#  image: maven:3.5-jdk-8-alpine
+  #  image: maven:3.5-jdk-8-alpine
   stage: compile
   allow_failure: false
   # 只在哪个分支生效
@@ -73,8 +73,8 @@ compile:
     - demo
   # 运行脚本
   script:
-#    - $MAVEN_HOME/bin/mvn -Dmaven.repo.local=$MAVEN_REPO clean package -Dmaven.test.skip=true
-#     - /usr/local/maven/apache-maven-3.6.2/bin/mvn clean package -Dmaven.test.skip=true
+    #    - $MAVEN_HOME/bin/mvn -Dmaven.repo.local=$MAVEN_REPO clean package -Dmaven.test.skip=true
+    #     - /usr/local/maven/apache-maven-3.6.2/bin/mvn clean package -Dmaven.test.skip=true
     - mvn clean package -Dmaven.test.skip=true
   # 因为是Maven编译，所以会有Jar包产物，这里定义产物的过期时间
   artifacts:
@@ -86,7 +86,7 @@ compile:
 
 # 2、构建SpringBoot镜像
 build:
-#  image: docker:stable
+  #  image: docker:stable
   stage: build
   script:
     # 这里的变量会自动获取你当前推送代码的gitlab用户和密码以及仓库地址
@@ -105,7 +105,7 @@ build:
 
 # 3、运行
 run:
-#  image: docker:stable
+  #  image: docker:stable
   stage: run
   script:
     - docker stop $PROJECT || true
