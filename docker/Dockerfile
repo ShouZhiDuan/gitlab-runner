@@ -27,8 +27,8 @@ RUN chmod +x /usr/local/bin/docker-compose
 #安装JDK
 RUN mkdir -p /usr/local/java
 WORKDIR /usr/local/java
-COPY jdk-8u261-linux-x64.tar.gz /usr/local/java
-RUN tar -zxvf jdk-8u261-linux-x64.tar.gz  &&  rm -fr jdk-8u261-linux-x64.tar.gz
+COPY jdk-11.0.14_linux-aarch64_bin.tar.gz /usr/local/java
+RUN tar -zxvf jdk-11.0.14_linux-aarch64_bin.tar.gz  &&  rm -fr jdk-11.0.14_linux-aarch64_bin.tar.gz
 
 #安装MAVEN
 RUN mkdir -p /usr/local/maven
@@ -49,7 +49,7 @@ RUN ln -s /usr/local/bin/apache-maven-3.3.9/bin/mvn /usr/local/bin/mvn
 RUN echo $PATH
 
 #添加环境变量
-ENV JAVA_HOME /usr/local/java/jdk1.8.0_261
+ENV JAVA_HOME /usr/local/java/jdk-11.0.14
 ENV MAVEN_HOME /usr/local/maven/apache-maven-3.6.2
 ENV PATH $PATH:$JAVA_HOME/bin:$MAVEN_HOME/bin
 
